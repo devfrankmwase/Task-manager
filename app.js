@@ -8,6 +8,7 @@ const completedCount = document.querySelector("#completed-count");
 const message = document.querySelector("#message");
 const searchInput = document.querySelector("#search-input");
 const filterButtons = document.querySelectorAll("[data-filter]");
+const sortSelect = document.querySelector("#sort-select");
 
 const savedTasks = localStorage.getItem("tasks");
 
@@ -48,11 +49,23 @@ function renderTasks() {
         return matchesSearch;
     });
 
+    const sortedTasks = [...filteredTasks];
+
+    if(sortSelect.value === "newest") {
+        sortedTasks.sort(function (a,b){
+            return b.id - a.id;
+        });
+    } else {
+        sortedTasks.sort(function(a,b){
+            return a.id - b.id;
+        });
+    }
+
     taskList.replaceChildren();
 
-    for (let i = 0; i < filteredTasks.length; i++) {
+    for (let i = 0; i < sortedTasks.length; i++) {
 
-        const task = filteredTasks[i];
+        const task = sortedTasks[i];
 
         const listItem = document.createElement("li");
         const taskText = document.createElement("span");
@@ -200,6 +213,10 @@ searchInput.addEventListener("input", function () {
         renderTasks();
     });
  });
+
+ sortSelect.addEventListener("change", function (){
+    renderTasks();
+ })
 
  updateTaskCount();
  renderTasks();

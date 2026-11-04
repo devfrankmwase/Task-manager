@@ -2,8 +2,9 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, intial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>My Task Manager</title>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
         <h1>My Task Manager</h1>
@@ -17,7 +18,24 @@
             <button type="submit">Add task</button>
         </form>
 
+        <input
+            id="search-input"
+            type="text"
+            placeholder="search tasks..."
+            >
+
+            <div id="filter-buttons">
+                <button type="button" data-filter=" all">All</button>
+                <button type="button" data-filter="active">Active</button>
+                <button type="button" data-filter="completed">Completed</button>
+            </div>
+
         <p id="message"></p>
+        <div id="task-count">
+            <p>All: <span id="all-count">0</span></p>
+            <p>Active: <span id="active-count">0</span></p>
+            <p>Completed: <span id="completed-count">0</span></p>
+        </div>
         <ul id="task-list"></ul>
 
         <script src="app.js" defer></script>

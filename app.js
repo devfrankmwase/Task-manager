@@ -9,6 +9,7 @@ const message = document.querySelector("#message");
 const searchInput = document.querySelector("#search-input");
 const filterButtons = document.querySelectorAll("[data-filter]");
 const sortSelect = document.querySelector("#sort-select");
+const taskPriority = document.querySelector("#task-priority");
 
 const savedTasks = localStorage.getItem("tasks");
 
@@ -49,17 +50,28 @@ function renderTasks() {
         return matchesSearch;
     });
 
+    const priorityRank = {
+        high: 3, 
+        medium: 2, 
+        low: 1
+    };
+
     const sortedTasks = [...filteredTasks];
 
     if(sortSelect.value === "newest") {
         sortedTasks.sort(function (a,b){
             return b.id - a.id;
         });
-    } else {
+    } else if (sortSelect.value === "oldest") {
         sortedTasks.sort(function(a,b){
             return a.id - b.id;
+        });}
+        else if (sortSelect.value === "priority") {
+        sortedTasks.sort(function (a, b){
+        return priorityRank[b.priority] - priorityRank[a.priority]
         });
-    }
+        }
+    
 
     taskList.replaceChildren();
 
@@ -69,11 +81,19 @@ function renderTasks() {
 
         const listItem = document.createElement("li");
         const taskText = document.createElement("span");
+        const priorityText = document.createElement("span");
+        
+        
+        
+        
         const completeButton = document.createElement("button");
         const deleteButton = document.createElement("button");
         const editButton = document.createElement("button");
 
         taskText.textContent = task.title;
+
+        priorityText.textContent = "Priority: " + task.priority;
+
 
         completeButton.textContent = task.completed ? "Undo" :"Complete";
         completeButton.type = "button";
@@ -84,6 +104,14 @@ function renderTasks() {
 
         editButton.textContent = "Edit";
         editButton.type = "button";
+
+        if(task.priority === "high"){
+            priorityText.classList.add("high");
+        } else if (task.priority === "medium") {
+            priorityText.classList.add("medium");
+        } else {
+            priorityText.classList.add("low");
+        }
 
 
         completeButton.addEventListener("click", function (){
@@ -111,6 +139,24 @@ function renderTasks() {
             editInput.type = "text";
             editInput.value = task.title;
 
+            const prioritySelect = document.createElement("select");
+
+            const lowOption = document.createElement("option");
+            lowOption.value = "low";
+            lowOption.textContent ="Low";
+
+            const mediumOption = document.createElement("option");
+            mediumOption.value = "medium";
+            mediumOption.textContent = "Medium";
+
+            const highOption = document.createElement("option");
+            highOption.value = "high";
+            highOption.textContent = "High";
+
+            prioritySelect.append(lowOption, mediumOption, highOption);
+
+            prioritySelect.value = task.priority;
+
             const saveButton = document.createElement("button");
             saveButton.textContent = "Save";
             saveButton.type = "button";
@@ -128,6 +174,7 @@ function renderTasks() {
                 }
 
                 task.title = updatedTask;
+                task.priority = prioritySelect.value;
 
                 saveTasks();
                 renderTasks();
@@ -137,17 +184,21 @@ function renderTasks() {
                 renderTasks();
             });
 
-            listItem.replaceChildren(editInput, saveButton, cancelButton);
+            listItem.replaceChildren(editInput,prioritySelect, saveButton, cancelButton);
         });
 
         
-
         if(task.completed) {
             taskText.style.textDecoration = "line-through";
         }
 
         
-        listItem.append(taskText,completeButton,editButton, deleteButton);
+        listItem.append(
+            taskText,
+            priorityText,
+            completeButton,
+            editButton,
+            deleteButton);
         taskList.append(listItem);
     }
 }
@@ -180,7 +231,8 @@ taskForm.addEventListener("submit", function (event) {
     tasks.push({
         id: nextTaskId,
         title: task,
-        completed: false
+        completed: false,
+        priority: taskPriority.value
     });
 
     nextTaskId++;

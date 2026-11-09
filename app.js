@@ -10,6 +10,7 @@ const searchInput = document.querySelector("#search-input");
 const filterButtons = document.querySelectorAll("[data-filter]");
 const sortSelect = document.querySelector("#sort-select");
 const taskPriority = document.querySelector("#task-priority");
+const taskDeadline = document.querySelector("#task-deadline");
 
 const savedTasks = localStorage.getItem("tasks");
 
@@ -82,18 +83,39 @@ function renderTasks() {
         const listItem = document.createElement("li");
         const taskText = document.createElement("span");
         const priorityText = document.createElement("span");
-        
-        
-        
-        
+        const deadlineText = document.createElement("span");
         const completeButton = document.createElement("button");
         const deleteButton = document.createElement("button");
         const editButton = document.createElement("button");
+        const deadlineInput = document.createElement("input");
 
         taskText.textContent = task.title;
 
         priorityText.textContent = "Priority: " + task.priority;
 
+        if (task.deadline){
+            deadlineText.textContent = "Deadline: " + task.deadline;
+        } else {
+            deadlineText.textContent = "No deadline";
+        }
+
+        const now = new Date();
+
+        const today = now.getFullYear() + "-" + 
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
+        String(now.getDate()).padStart(2, "0");
+
+        console.log("Deadline:", task.deadline);
+        console.log("Today:", today);
+        console.log("Is overdue:", task.deadline < today);
+
+        if(task.deadline && task.deadline < today && !task.completed) {
+            deadlineText.textContent += " (OVERDUE)";
+            deadlineText.classList.add("overdue");
+        }
+
+        console.log("Deadline element:", deadlineText.textContent);
+        console.log("Classes:", deadlineText.className);
 
         completeButton.textContent = task.completed ? "Undo" :"Complete";
         completeButton.type = "button";
@@ -157,6 +179,9 @@ function renderTasks() {
 
             prioritySelect.value = task.priority;
 
+            deadlineInput.type = "date";
+            deadlineInput.value = task.deadline || "";
+
             const saveButton = document.createElement("button");
             saveButton.textContent = "Save";
             saveButton.type = "button";
@@ -175,6 +200,7 @@ function renderTasks() {
 
                 task.title = updatedTask;
                 task.priority = prioritySelect.value;
+                task.deadline = deadlineInput.value;
 
                 saveTasks();
                 renderTasks();
@@ -184,7 +210,7 @@ function renderTasks() {
                 renderTasks();
             });
 
-            listItem.replaceChildren(editInput,prioritySelect, saveButton, cancelButton);
+            listItem.replaceChildren(editInput, prioritySelect, deadlineInput, saveButton, cancelButton);
         });
 
         
@@ -196,6 +222,7 @@ function renderTasks() {
         listItem.append(
             taskText,
             priorityText,
+            deadlineText,
             completeButton,
             editButton,
             deleteButton);
@@ -232,7 +259,8 @@ taskForm.addEventListener("submit", function (event) {
         id: nextTaskId,
         title: task,
         completed: false,
-        priority: taskPriority.value
+        priority: taskPriority.value,
+        deadline: taskDeadline.value
     });
 
     nextTaskId++;

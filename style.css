@@ -197,6 +197,11 @@ button:active {
     background-color: #dcfce7;
 }
 
+.overdue {
+    color: red !important;
+    font-weight: bold;
+}
+
 /* Mobile responsiveness */
 @media (max-width: 600px) {
     body {

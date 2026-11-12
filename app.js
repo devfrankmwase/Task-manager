@@ -11,6 +11,8 @@ const filterButtons = document.querySelectorAll("[data-filter]");
 const sortSelect = document.querySelector("#sort-select");
 const taskPriority = document.querySelector("#task-priority");
 const taskDeadline = document.querySelector("#task-deadline");
+const taskCategory = document.querySelector("#task-category");
+const categoryFilter = document.querySelector("#category-filter");
 
 const savedTasks = localStorage.getItem("tasks");
 
@@ -40,15 +42,18 @@ function renderTasks() {
         const matchesSearch = task.title.toLowerCase()
         .includes(searchInput.value.toLowerCase());
 
+         const matchesCategory = categoryFilter.value === "all" ||
+         task.category === categoryFilter.value;
+
         if (currentFilter === "completed") {
-            return matchesSearch && task.completed;
+            return matchesSearch && matchesCategory && task.completed;
         }
 
         if(currentFilter === "active") {
-            return matchesSearch && !task.completed;
+            return matchesSearch && matchesCategory && !task.completed;
         }
 
-        return matchesSearch;
+        return matchesSearch && matchesCategory;
     });
 
     const priorityRank = {
@@ -72,6 +77,8 @@ function renderTasks() {
         return priorityRank[b.priority] - priorityRank[a.priority]
         });
         }
+
+        
     
 
     taskList.replaceChildren();
@@ -84,6 +91,7 @@ function renderTasks() {
         const taskText = document.createElement("span");
         const priorityText = document.createElement("span");
         const deadlineText = document.createElement("span");
+        const categoryText = document.createElement("span");
         const completeButton = document.createElement("button");
         const deleteButton = document.createElement("button");
         const editButton = document.createElement("button");
@@ -113,9 +121,8 @@ function renderTasks() {
             deadlineText.textContent += " (OVERDUE)";
             deadlineText.classList.add("overdue");
         }
-
-        console.log("Deadline element:", deadlineText.textContent);
-        console.log("Classes:", deadlineText.className);
+        
+        categoryText.textContent = "Category: " + task.category;
 
         completeButton.textContent = task.completed ? "Undo" :"Complete";
         completeButton.type = "button";
@@ -179,6 +186,28 @@ function renderTasks() {
 
             prioritySelect.value = task.priority;
 
+            const categorySelect = document.createElement("select");
+
+            const workOption = document.createElement("option");
+            workOption.value = "work";
+            workOption.textContent = "Work";
+
+            const personalOption = document.createElement("option");
+            personalOption.value = "personal";
+            personalOption.textContent = "Personal";
+
+            const learningOption = document.createElement("option");
+            learningOption.value = "learning";
+            learningOption.textContent = "Learning";
+
+            const projectOption = document.createElement("option");
+            projectOption.value = "projects";
+            projectOption.textContent = "Projects";
+
+            categorySelect.append(workOption, personalOption, learningOption, projectOption);
+
+            categorySelect.value = task.category;
+
             deadlineInput.type = "date";
             deadlineInput.value = task.deadline || "";
 
@@ -201,6 +230,7 @@ function renderTasks() {
                 task.title = updatedTask;
                 task.priority = prioritySelect.value;
                 task.deadline = deadlineInput.value;
+                task.category = categorySelect.value;
 
                 saveTasks();
                 renderTasks();
@@ -210,7 +240,13 @@ function renderTasks() {
                 renderTasks();
             });
 
-            listItem.replaceChildren(editInput, prioritySelect, deadlineInput, saveButton, cancelButton);
+            listItem.replaceChildren(
+                editInput,
+                prioritySelect,
+                deadlineInput,
+                categorySelect,
+                saveButton,
+                cancelButton);
         });
 
         
@@ -223,6 +259,7 @@ function renderTasks() {
             taskText,
             priorityText,
             deadlineText,
+            categoryText,
             completeButton,
             editButton,
             deleteButton);
@@ -260,7 +297,8 @@ taskForm.addEventListener("submit", function (event) {
         title: task,
         completed: false,
         priority: taskPriority.value,
-        deadline: taskDeadline.value
+        deadline: taskDeadline.value,
+        category: taskCategory.value
     });
 
     nextTaskId++;
@@ -295,6 +333,10 @@ searchInput.addEventListener("input", function () {
  });
 
  sortSelect.addEventListener("change", function (){
+    renderTasks();
+ });
+
+ categoryFilter.addEventListener("change", function (){
     renderTasks();
  })
 

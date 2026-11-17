@@ -14,22 +14,108 @@ const taskDeadline = document.querySelector("#task-deadline");
 const taskCategory = document.querySelector("#task-category");
 const categoryFilter = document.querySelector("#category-filter");
 
-const savedTasks = localStorage.getItem("tasks");
-
 let currentFilter = "all";
+let tasks = [];
+let nextTaskId = 1;
 
-const tasks = savedTasks ? JSON.parse(savedTasks) : [];
 
-let nextTaskId = tasks.length > 0
-    ? Math.max(0,...tasks.map(task =>Number(task.id) || 0)) + 1 : 1;
+function isValidTask(task) {
+    return (
+        task !== null &&
+        typeof task === "object" &&
+        !Array.isArray(task) &&
+        typeof task.title === "string" &&
+        task.title.trim() !== ""
+    );
+}
 
-    tasks.forEach(function (task) {
-        if (!Number.isInteger(task.id) || task.id <= 0) {
-            task.id = nextTaskId++;
+function isValidDeadline(deadline) {
+    if (deadline === "") {
+        return true;
+    }
+
+    if (typeof deadline !== "string") {
+        return false;
+    }
+
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+
+    if(!datePattern.test(deadline)) {
+        return false;
+    }
+
+    const [year, month, day] = deadline.split("-").map(Number);
+
+    const date = new Date (year, month - 1, day);
+
+    return date.getFullYear() === year &&
+    date.getMonth() + 1 === month &&
+    date.getDate() === day;
+}
+
+function normalizeTask(task, normalizedTasks) {
+   const idAlreadyExists = normalizedTasks.some(function(existingTask) {
+    return existingTask.id === task.id;
+    
+   });
+    return {
+        id: Number.isInteger(task.id) && 
+        task.id > 0 && !idAlreadyExists ?
+         task.id : nextTaskId++, 
+        title: task.title,
+        priority: ["high","medium","low"].includes(task.priority)
+        ? task.priority : "medium",
+        category: ["work","personal","learning","projects"].includes(task.category)
+        ? task.category : "personal",
+        deadline: isValidDeadline(task.deadline) ? task.deadline : "",
+        completed: typeof task.completed === "boolean"
+        ? task.completed : false
+    };
+}
+
+try{
+    const savedTasks = localStorage.getItem("tasks");
+    tasks = savedTasks ? JSON.parse(savedTasks) : [];
+
+    if (!Array.isArray(tasks)) {
+        console.error("Saved tasks data is not an array");
+        tasks = [];        
+    } else {
+        const originalLength = tasks.length;
+        tasks = tasks.filter(isValidTask);
+
+        const normalizedTasks = [];
+
+        nextTaskId = Math.max(
+            0,
+            ...tasks.map(function(task) {
+        return Number.isInteger(task.id) && task.id > 0
+        ? task.id
+        :0;
+    })
+ ) + 1;
+        
+
+        if (tasks.length !== originalLength) {
+            console.warn("Invalid tasks were removed.");
         }
-    });
 
-    saveTasks();
+        tasks.forEach(function(task) {
+            const normalizedTask = normalizeTask(task, normalizedTasks);
+            normalizedTasks.push(normalizedTask);
+        });
+
+         tasks = normalizedTasks;
+         localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+}
+catch(error){
+    console.error("Could not load tasks:", error);
+    tasks = [];
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
     
     function saveTasks() {
         localStorage.setItem("tasks", JSON.stringify(tasks))
@@ -117,8 +203,13 @@ function renderTasks() {
         console.log("Today:", today);
         console.log("Is overdue:", task.deadline < today);
 
-        if(task.deadline && task.deadline < today && !task.completed) {
-            deadlineText.textContent += " (OVERDUE)";
+        const isOverdue = 
+        task.deadline &&
+        task.deadline < today &&
+        !task.completed;
+
+        if(isOverdue){
+            deadlineText.textContent += "(OVERDUE)";
             deadlineText.classList.add("overdue");
         }
         
@@ -227,6 +318,21 @@ function renderTasks() {
                     return;
                 }
 
+                if (updatedTask.length > 100) {
+                    message.textContent = "Task title cannot exceed 100 characters";
+                    return;
+                }
+
+                const taskExists = tasks.some(function (existingTask){
+                    return existingTask.id !== task.id &&
+                    existingTask.title.toLowerCase() === updatedTask.toLowerCase();
+                });
+
+                if (taskExists) {
+                    message.textContent = "Another task already has this title.";
+                    return;
+                }
+
                 task.title = updatedTask;
                 task.priority = prioritySelect.value;
                 task.deadline = deadlineInput.value;
@@ -289,6 +395,20 @@ taskForm.addEventListener("submit", function (event) {
 
     if (task === "") {
         message.textContent = "Please enter a task.";
+        return;
+    }
+
+    if (task.length > 100) {
+        message.textContent = "Task title cannot exceed 100 characters.";
+        return;
+    }
+
+    const taskExists = tasks.some(function (existingTask) {
+        return existingTask.title.toLowerCase() === task.toLowerCase();
+    });
+
+    if (taskExists) {
+        message.textContent = "This task already exists.";
         return;
     }
 

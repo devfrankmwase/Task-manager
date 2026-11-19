@@ -199,9 +199,7 @@ function renderTasks() {
         String(now.getMonth() + 1).padStart(2, "0") + "-" +
         String(now.getDate()).padStart(2, "0");
 
-        console.log("Deadline:", task.deadline);
-        console.log("Today:", today);
-        console.log("Is overdue:", task.deadline < today);
+      
 
         const isOverdue = 
         task.deadline &&
@@ -212,6 +210,10 @@ function renderTasks() {
             deadlineText.textContent += "(OVERDUE)";
             deadlineText.classList.add("overdue");
         }
+
+        console.log("Deadline:", task.deadline);
+        console.log("Today:", today);
+        console.log("Is overdue:",Boolean(isOverdue));
         
         categoryText.textContent = "Category: " + task.category;
 
@@ -468,4 +470,29 @@ searchInput.addEventListener("input", function () {
 
     
 
-
+const testTasks = [
+    {
+        id: 1,
+        title: "Learn JavaScript",
+        priority: "high",
+        category: "learning",
+        deadline: "2026-11-20",
+        completed: false
+    },
+    {
+        id: 2,
+        title: "Build portfolio",
+        priority: "medium",
+        category: "projects",
+        deadline: "2026-02-30",
+        completed: false
+    },
+    {
+        id: 3,
+        title: "Practise coding",
+        priority: "low",
+        category: "learning",
+        deadline: "",
+        completed: false
+    }
+];

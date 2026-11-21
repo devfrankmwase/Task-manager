@@ -13,6 +13,8 @@ const taskPriority = document.querySelector("#task-priority");
 const taskDeadline = document.querySelector("#task-deadline");
 const taskCategory = document.querySelector("#task-category");
 const categoryFilter = document.querySelector("#category-filter");
+const overdueCount = document.querySelector("#overdue-count");
+const completionPercentageDisplay = document.querySelector("#completion-percentage");
 
 let currentFilter = "all";
 let tasks = [];
@@ -341,6 +343,7 @@ function renderTasks() {
                 task.category = categorySelect.value;
 
                 saveTasks();
+                updateTaskCount();
                 renderTasks();
             });
 
@@ -388,6 +391,30 @@ function updateTaskCount() {
 
     activeCount.textContent = activeTasks.length;
     completedCount.textContent = completedTasks.length;
+
+    const completionPercentage = tasks.length > 0 
+    ? Math.round((completedTasks.length / tasks.length) * 100) 
+    : 0; 
+
+    const now = new Date();
+
+    const today = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0") + "-" +
+    String(now.getDate()).padStart(2, "0");
+
+    console.log("Today:", today);
+console.log("Task deadlines:", tasks.map(task => task.deadline));
+console.log("Tasks:", tasks);
+
+    const overdueTasks = tasks.filter(function(task){
+        return task.deadline && 
+            task.deadline < today && 
+            !task.completed;
+    });
+
+    const overdueTaskCount = overdueTasks.length;
+
+    overdueCount.textContent = overdueTaskCount;
+    completionPercentageDisplay.textContent = completionPercentage + "%";
 }
 
 taskForm.addEventListener("submit", function (event) {

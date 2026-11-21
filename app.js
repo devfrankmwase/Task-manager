@@ -337,7 +337,7 @@ function renderTasks() {
                     return;
                 }
 
-                task.title = updatedTask;
+                task.title = updatedTask;g
                 task.priority = prioritySelect.value;
                 task.deadline = deadlineInput.value;
                 task.category = categorySelect.value;

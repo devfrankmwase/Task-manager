@@ -126,25 +126,41 @@ button:active {
 /* Task statistics */
 #task-count {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 12px;
     text-align: center;
 }
 
 #task-count p {
-    padding: 12px 6px;
+    padding: 20px 12px;
     background-color: #f1f5f9;
     border-radius: 8px;
     font-size: 14px;
     color: #64748b;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+}
+
+#task-count p:hover {
+    transform: translateY(-3px);
+    
 }
 
 #task-count span {
     display: block;
     margin-top: 6px;
-    font-size: 24px;
+    font-size: 32px;
     font-weight: bold;
     color: #1e293b;
+}
+
+
+#task-count .overdue-warning {
+    color: #dc2626;
+}
+
+#task-count .overdue-clear {
+    color: #16a34a;
 }
 
 /* Message */

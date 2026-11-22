@@ -337,7 +337,7 @@ function renderTasks() {
                     return;
                 }
 
-                task.title = updatedTask;g
+                task.title = updatedTask;
                 task.priority = prioritySelect.value;
                 task.deadline = deadlineInput.value;
                 task.category = categorySelect.value;
@@ -402,8 +402,8 @@ function updateTaskCount() {
     String(now.getDate()).padStart(2, "0");
 
     console.log("Today:", today);
-console.log("Task deadlines:", tasks.map(task => task.deadline));
-console.log("Tasks:", tasks);
+    console.log("Task deadlines:", tasks.map(task => task.deadline));
+    console.log("Tasks:", tasks);
 
     const overdueTasks = tasks.filter(function(task){
         return task.deadline && 
@@ -415,6 +415,18 @@ console.log("Tasks:", tasks);
 
     overdueCount.textContent = overdueTaskCount;
     completionPercentageDisplay.textContent = completionPercentage + "%";
+
+    if (overdueTaskCount > 0) {
+        overdueCount.classList.remove("overdue-clear");
+        overdueCount.classList.add("overdue-warning");
+    } else 
+    {
+        overdueCount.classList.remove("overdue-warning");
+        overdueCount.classList.add("overdue-clear");
+    }
+
+    console.log("Overdue count:", overdueTaskCount);
+console.log("Applied classes:", overdueCount.className);
 }
 
 taskForm.addEventListener("submit", function (event) {
